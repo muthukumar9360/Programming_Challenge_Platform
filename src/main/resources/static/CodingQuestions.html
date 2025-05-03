@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coding Questions</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 10px;
+        }
+        
+        h2 {
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+        .completed {
+            color: green;
+            font-weight: bold;
+        }
+        .not-completed {
+            color: red;
+            font-weight: bold;
+        }
+        
+        #back-button{
+        	color:black;
+        	background-color:red;
+        	padding:8px;
+        	font-size:15px;
+        	cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <button id="back-button" onclick="reload()">⬅ Back</button>
+    <h2>Coding Questions for Set: <span id="setName"></span></h2>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Question ID</th>
+                <th>Question Title</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="questionsTable">
+
+        </tbody>
+    </table>
+
+    <script>
+        window.onload = function () {
+            if (!sessionStorage.getItem("reloaded")) {
+              sessionStorage.setItem("reloaded", "true");
+              location.reload();
+            } else {
+              sessionStorage.removeItem("reloaded");
+            }
+        };
+
+       function reload() {
+           window.history.back();
+       }
+
+       document.addEventListener("DOMContentLoaded", function () {
+
+           const urlParams = new URLSearchParams(window.location.search);
+           const setId = urlParams.get("set_id");
+
+           console.log("🔍 Extracted Set ID from URL:", setId);
+
+           if (!setId) {
+               alert("Invalid Set ID!");
+               return;
+           }
+
+           fetch(`/CodingQuestions?set_id=${setId}`)
+           .then(response => {
+               if (response.status === 401) {
+                   alert("Session expired! Redirecting to login...");
+                   window.location.href = "login.html";
+                   return;
+               } else if (response.status === 404) {
+                   alert("Questions not found for the selected set.");
+                   return;
+               } else if (!response.ok) {
+                   alert("Unexpected server error.");
+                   return;
+               }
+               return response.json();
+           })
+           .then(data => {
+               document.getElementById("setName").innerText = data[0].setName;
+
+               let tableBody = document.getElementById("questionsTable");
+               tableBody.innerHTML = "";
+
+               data.forEach(question => {
+                   let row = `
+                       <tr>
+                           <td>${question.qid}</td>
+                           <td>${question.questionTitle}</td>
+                           <td class="${question.completed ? 'completed' : 'not-completed'}">
+                               ${question.completed ? "Completed" : "Not Completed"}
+                           </td>
+                           <td>
+                               <a href="AttemptQuestions.html?qid=${question.qid}"
+                                  style="text-decoration: none; color: blue;">Attempt</a>
+                           </td>
+                       </tr>
+                   `;
+                   tableBody.innerHTML += row;
+               });
+           })
+           .catch(error => {
+               console.error("❌ Error loading questions:", error);
+               alert("Error loading questions. Please try again.");
+           });
+       });
+        
+    </script>
+
+</body>
+</html>

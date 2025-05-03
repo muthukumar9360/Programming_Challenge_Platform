@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enter OTP</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 320px;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .otp-container {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .otp-container input {
+            width: 40px;
+            height: 50px;
+            text-align: center;
+            font-size: 22px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .otp-container input:focus {
+            border-color: #007bff;
+        }
+
+        button {
+            width: 100%;
+            background-color: #28a745;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        .info {
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        #timer {
+            font-size: 14px;
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Enter OTP</h2>
+        <form action="/VerifyOTP" method="post">
+            <div class="otp-container">
+                <input type="text" maxlength="1" name="otp1" required onkeyup="moveToNext(this, 'otp2')">
+                <input type="text" maxlength="1" name="otp2" required onkeyup="moveToNext(this, 'otp3')">
+                <input type="text" maxlength="1" name="otp3" required onkeyup="moveToNext(this, 'otp4')">
+                <input type="text" maxlength="1" name="otp4" required onkeyup="moveToNext(this, 'otp5')">
+                <input type="text" maxlength="1" name="otp5" required onkeyup="moveToNext(this, 'otp6')">
+                <input type="text" maxlength="1" name="otp6" required>
+            </div>
+            <button type="submit">Verify</button>
+        </form>
+        <p class="info">Check your email for the OTP.</p>
+        <p id="timer">Session Expires in: <span id="countdown">60</span>s</p>
+    </div>
+
+    <script>
+        function moveToNext(currentInput, nextInputId) {
+            if (currentInput.value.length === 1) {
+                document.getElementsByName(nextInputId)[0]?.focus();
+            }
+        }
+
+        let timeLeft = 60; 
+        let timer = setInterval(function () {
+            timeLeft--;
+            document.getElementById("countdown").innerText = timeLeft;
+
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                window.location.href = "SignUp.html"; 
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

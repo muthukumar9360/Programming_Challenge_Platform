@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coding Challenge</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1e1e1e;
+            color: white;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .top-bar {
+            background: #222;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .container {
+            display: flex;
+            flex-grow: 1;
+        }
+
+        .left-panel, .right-panel {
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .left-panel {
+            width: 50%;
+            overflow-y: auto;
+            background: #2d2d2d;
+            border-right: 2px solid #444;
+        }
+
+        .right-panel {
+            width: 50%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .editor-container {
+            flex-grow: 1;
+            background: #1e1e1e;
+            border: 1px solid #444;
+            height: 400px;
+        }
+
+        select, button {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            font-size: 16px;
+        }
+
+        select {
+            background: #444;
+            color: white;
+        }
+
+        button {
+            background: #ff5722;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .output-box {
+            background: #000;
+            color: #0f0;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-family: monospace;
+            min-height: 50px;
+        }
+        
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+     	<button id="back-button" onclick="reload()">⬅ Back</button>
+        <span><strong>Username:</strong> <span id="username">Loading...</span></span>
+        <span><strong>Medals (Coding):</strong> <span id="medals">Loading...</span></span>
+    </div>
+
+    <div class="container">
+
+        <div class="left-panel">
+            <h3 id="question-title">Loading...</h3>
+            <p id="question-description">Fetching question details...</p>
+            <h4>Input Format</h4>
+            <p id="input-format">Loading...</p>
+            <h4>Output Format</h4>
+            <p id="output-format">Loading...</p>
+            <h4>Constraints</h4>
+            <p id="constraints">Loading...</p>
+            <h4>Sample Test Cases</h4>
+            <div id="testcases"><p>Loading test cases...</p></div>
+        </div>
+
+        <div class="right-panel">
+            <select id="language-selector">
+                <option value="java">Java</option>
+                <option value="python">Python</option>
+                <option value="cpp">C++</option>
+                <option value="c">C</option>
+            </select>
+
+            <div id="editor" class="editor-container"></div>
+
+            <button onclick="submitCode()">Run Code</button>
+
+            <div class="output-box" id="output-result">Output will be displayed here...</div>
+        </div>
+        
+    </div>
+
+    <script>
+        window.onload = function () {
+            if (!sessionStorage.getItem("reloaded")) {
+              sessionStorage.setItem("reloaded", "true");
+              location.reload();
+            } else {
+              sessionStorage.removeItem("reloaded");
+            }
+        };
+
+       function loadtestcases(qid) {
+           fetch(`/Testcase?qid=${qid}`, {
+               method: "GET"
+           })
+           .then(response => response.json())
+           .then(data => {
+               console.log("Received data from backend:");
+               console.log(data);
+
+               let testCasesDiv = document.getElementById("testcases");
+               testCasesDiv.innerHTML = "";
+               data.forEach(tc => {
+                   testCasesDiv.innerHTML += `<p><strong>Input:</strong> ${tc.input_data}</p>
+                                              <p><strong>Output:</strong> ${tc.expected_output}</p>`;
+               });
+           })
+           .catch(error => {
+               console.error("Error while fetching coding sets:", error);
+           });
+       }
+
+       function getMedals(){
+            fetch("/medal",{
+                method:"GET"
+            })
+            .then(response=>response.text())
+            .then(data=>{
+                let m=document.getElementById("medals");
+                m.textContent=data;
+            })
+            .catch(error=>{
+                console.log(error);
+            })
+        }
+        function getUsername(){
+            fetch("/userdetails",{
+                method:"GET"
+            })
+            .then(response=>response.text())
+            .then(data=>{
+                let v=document.getElementById("username");
+                v.textContent=data;
+            })
+            .catch(error=>{
+                console.log(error);
+            })
+            getMedals();
+        }
+
+        function reload() {
+            window.history.back();
+
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const qid = urlParams.get("qid");
+
+            if (!qid) {
+                alert("Invalid Question ID!");
+                return;
+            }
+
+            getUsername()
+
+            fetch("/Attempt?qid=" + qid)
+                .then(response => {
+                    if (response.status === 401) {
+                        alert("Session expired! Redirecting to login...");
+                        window.location.href = "login.html";
+                        return;
+                    }
+                    else if (!response.ok) {
+                        alert("Unexpected server error.");
+                        return;
+                    }
+                    return response.json();
+                })
+                .then(data => {
+
+                    document.getElementById("question-title").innerText = data.question_title;
+                    document.getElementById("question-description").innerText = data.description;
+                    document.getElementById("input-format").innerText = data.input_format;
+                    document.getElementById("output-format").innerText = data.output_format;
+                    document.getElementById("constraints").innerText = data.constraints;
+                    loadtestcases(qid);
+
+                });
+
+            var editor = ace.edit("editor");
+            editor.setTheme("ace/theme/monokai");
+            editor.session.setMode("ace/mode/java");
+            editor.setValue("// Write your code here...Default File or Class Name is Temp");
+
+            document.getElementById("language-selector").addEventListener("change", function () {
+                var selectedLang = this.value;
+                var mode = "ace/mode/java";
+
+                if (selectedLang === "python") mode = "ace/mode/python";
+                else if (selectedLang === "cpp") mode = "ace/mode/c_cpp";
+                else if (selectedLang === "c") mode = "ace/mode/c_cpp";
+
+                editor.session.setMode(mode);
+            });
+
+            setTimeout(() => {
+                editor.resize();
+            }, 500);
+
+            window.submitCode = function () {
+                var code = editor.getValue();
+                var language = document.getElementById("language-selector").value;
+                var outputDiv = document.getElementById("output-result");
+                const urlParams = new URLSearchParams(window.location.search);
+                const qid = urlParams.get("qid");
+
+                outputDiv.innerText = "Running code...";
+
+                fetch("/Executecode", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ code: code, language: language, qid: qid })
+                })
+                .then(response => response.json())
+                .then(result => {
+                    outputDiv.innerHTML = "";
+                    result.results.forEach(testCase => {
+                        outputDiv.innerHTML += `<p><strong>Input:</strong> ${testCase.input}</p>
+                                                <p><strong>Expected Output:</strong> ${testCase.expected}</p>
+                                                <p><strong>Your Output:</strong> ${testCase.output}</p>
+                                                <p><strong>Status:</strong> <span style="color: ${testCase.status === 'Passed' ? 'green' : 'red'}">${testCase.status}</span></p><hr>`;
+                    });
+
+                    if (result.status === "Completed") {
+                        outputDiv.innerHTML += "<p style='color: green; font-weight: bold;'>🎉 Congratulations! You completed this question.</p>";
+                        getMedals();
+                    }
+                })
+                .catch(error => {
+                    outputDiv.innerText = "Error executing code!";
+                });
+            };
+
+        });
+    </script>
+
+</body>
+</html>

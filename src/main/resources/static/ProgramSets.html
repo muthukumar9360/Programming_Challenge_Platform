@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProgramSets</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        #top-bar {
+            width: 100%;
+            background: #333;
+            color: white;
+            padding: 10px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        #username-display, #medal-display {
+            font-weight: bold;
+        }
+        #medal-display {
+            text-align: center;
+            margin-left:40px;
+        }
+        #logout-btn {
+            background: red;
+            color: white;
+            border: none;
+            padding: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        #logout-btn:hover {
+            background: darkred;
+        }
+
+        #sets-container {
+            margin-top: 100px;
+            text-align: center;
+        }
+        .grid-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            padding: 20px;
+        }
+        .set-box {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            width: 220px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, background 0.3s;
+            font-weight: bold;
+        }
+        .set-box:hover {
+            transform: scale(1.05);
+            background: #f0f0f0;
+        }
+        .enter-btn {
+            background: blue;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            margin-top: 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .enter-btn:hover {
+            background: darkblue;
+        }
+    </style>
+</head>
+<body>
+    <center>
+        <div id="top-bar">
+            <button id="logout-btn" onclick="logout()">Logout</button>
+            <span id="medal-display">Loading Medals...</span>
+            <span id="username-display">Loading...</span>
+        </div>
+    </center>
+    <div id="sets-container">
+        <h2>Available Coding Sets<br><br></h2>
+        <div class="grid-container" id="sets-list"></div>
+    </div>
+
+    <script>
+        window.onload = function () {
+            if (!sessionStorage.getItem("reloaded")) {
+              sessionStorage.setItem("reloaded", "true");
+              location.reload();
+            } else {
+              sessionStorage.removeItem("reloaded");
+            }
+        };
+        function logout(){
+            fetch("/logout",{
+                method:"GET"
+            })
+            .then(response=>{
+                if(response.ok){
+                    alert("Logged out Successfully")
+                    window.location.href = "/Login.html";
+                }
+            })
+            .catch(error=>{
+                console.log(error);
+            })
+        }
+        function getMedals(){
+            fetch("/medal",{
+                method:"GET"
+            })
+            .then(response=>response.text())
+            .then(data=>{
+                let m=document.getElementById("medal-display");
+                m.textContent=data;
+            })
+            .catch(error=>{
+                console.log(error);
+            })
+        }
+        function getUsername(){
+            fetch("/userdetails",{
+                method:"GET"
+            })
+            .then(response=>response.text())
+            .then(data=>{
+                let v=document.getElementById("username-display");
+                v.textContent=data;
+            })
+            .catch(error=>{
+                console.log(error);
+            })
+            getMedals();
+        }
+        function getValue(){
+
+            fetch("/codingsets", {
+                method: "GET"
+            })
+            .then(response => {
+                if (response.status === 401) {
+                    window.location.href = "login.html";
+                    return;
+                }
+                return response.json();
+            })
+            .then(data=> {
+                console.log("Received data from backend:");
+                console.log(data);
+
+                const setsList = document.getElementById("sets-list");
+                setsList.innerHTML = "";
+
+                for (let i = 0; i < data.length; i++) {
+                    const set = data[i];
+
+                    const setBox = document.createElement("div");
+                    setBox.classList.add("set-box");
+
+                    setBox.innerHTML = `
+                        <p><strong>Set ID:</strong> ${set.set_id}</p>
+                        <p><strong>Set Name:</strong> ${set.set_name}</p>
+                        <button class="enter-btn" onclick="getSet(${set.set_id})">Enter Set</button>
+                    `;
+
+                    setsList.appendChild(setBox);
+                }
+            })
+            .catch(error=> {
+                console.error("Error while fetching coding sets:", error);
+            });
+            getUsername();
+        }
+        getValue();
+        function getSet(set_id){
+            window.location.href = `CodingQuestions.html?set_id=${set_id}`;
+        }
+    </script>
+
+</body>
+</html>

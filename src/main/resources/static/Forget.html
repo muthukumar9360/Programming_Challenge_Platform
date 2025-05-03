@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forgot Password</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f8f9fa;
+        }
+        .container {
+            width: 350px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        h2 {
+            margin-bottom: 10px;
+        }
+        .message {
+            color: red;
+            font-size: 14px;
+            height: 18px;
+        }
+        input {
+            width: 94%;
+            padding: 10px;
+            margin: 8px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            display: block;
+            text-align: left;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .hidden {
+            display: none;
+        }
+        .password-container {
+            position: relative;
+            width: 94%;
+        }
+        .password-container input {
+            width: 100%;
+        }
+        .eye-icon {
+            position: absolute;
+            right: -15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+        }
+        .timer {
+            font-size: 14px;
+            color: red;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Forgot Password</h2>
+        <p class="message" id="message"></p>
+        <form id="forgetForm">
+            <input type="text" id="username" placeholder="Enter Username" required>
+            <input type="email" id="email" placeholder="Enter Email" required>
+            <input type="text" id="phno" placeholder="Enter Phone Number" required>
+            <button type="button" id="sendOtpBtn" onclick="sendOTP()">Send OTP</button>
+            <p class="timer hidden" id="otpTimer"></p>
+            <div id="otpSection" class="hidden">
+                <input type="text" id="otp" placeholder="Enter OTP" required>
+                <button type="button" onclick="verifyOTP()" id="verifyOTPBtn">Verify OTP</button>
+            </div>
+            <div id="passwordSection" class="hidden">
+                <div class="password-container">
+                    <input type="password" id="newpassword" placeholder="Enter New Password" required>
+                    <span class="eye-icon" onclick="togglePassword('newpassword')">👁️</span>
+                </div>
+                <div class="password-container">
+                    <input type="password" id="confirmpassword" placeholder="Confirm New Password" required>
+                    <span class="eye-icon" onclick="togglePassword('confirmpassword')">👁️</span>
+                </div>
+                <button type="button" onclick="resetPassword()">Reset Password</button>
+            </div>
+        </form>
+    </div>
+    <script>
+        let timerInterval;
+        function sendOTP() {
+            var username = $("#username").val().trim();
+            var email = $("#email").val().trim();
+            var phno = $("#phno").val().trim();
+            if (username === "" || email === "" || phno === "") {
+                $("#message").text("All fields are required!");
+                return;
+            }
+            $.post("/Forget", { step: "1", username: username, email: email, phno: phno }, function(response) {
+                if (response.success) {
+                    $("#message").css("color", "green").text(response.message);
+                    $("#otpSection").removeClass("hidden");
+                    $("#sendOtpBtn").prop("disabled", true); 
+                    startOtpTimer(); 
+                } else {
+                    $("#message").css("color", "red").text(response.message);
+                }
+            }, "json");
+        }
+        function startOtpTimer() {
+            let timeLeft = 60; 
+            $("#otpTimer").removeClass("hidden").text(`OTP expires in ${timeLeft}s`);
+
+            if (typeof timerInterval !== "undefined") {
+                clearInterval(timerInterval); 
+            }
+            timerInterval = setInterval(function () {
+                timeLeft--;
+                $("#otpTimer").text(`OTP expires in ${timeLeft}s`);
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    $("#otpTimer").text("OTP expired! Redirecting...");
+
+                    $("#sendOtpBtn").prop("disabled", false);
+
+                    setTimeout(function () {
+                        location.reload(); 
+                    }, 1000);
+                }
+            }, 1000);
+        }
+        function verifyOTP() {
+            var otp = $("#otp").val().trim();
+            if (otp === "") {
+                $("#message").text("Please enter OTP!");
+                return;
+            }
+            $.post("/Forget", { step: "2", otp: otp }, function(response) {
+                if (response.success) {
+                    $("#message").css("color", "green").text(response.message);
+                    $("#passwordSection").removeClass("hidden");
+                    clearInterval(timerInterval); 
+                    $("#otpTimer").addClass("hidden"); 
+                } else {
+                    $("#message").css("color", "red").text(response.message);
+                }
+            }, "json");
+        }
+        function resetPassword() {
+            var newpassword = $("#newpassword").val().trim();
+            var confirmpassword = $("#confirmpassword").val().trim();
+            if (newpassword === "" || confirmpassword === "") {
+                $("#message").text("Password fields cannot be empty!");
+                return;
+            }
+            if (newpassword !== confirmpassword) {
+                $("#message").text("Passwords do not match!");
+                return;
+            }
+            $.post("/Forget", { step: "3", newpassword: newpassword }, function(response) {
+                if (response.success) {
+                    $("#message").css("color", "green").text(response.message);
+                    setTimeout(function() {
+                        window.location.href = "Login.html"; 
+                    }, 2000);
+                } else {
+                    $("#message").css("color", "red").text(response.message);
+                }
+            }, "json");
+        }
+        function togglePassword(fieldId) {
+            var field = document.getElementById(fieldId);
+            field.type = (field.type === "password") ? "text" : "password";
+        }
+    </script>
+</body>
+</html>
