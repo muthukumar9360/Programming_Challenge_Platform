@@ -66,20 +66,17 @@ This is a **Java-based Programming Challenge Platform** that allows users to par
 
 ## 🚀 Getting Started
 
+```bash
 1. Clone this repository:
-   ```bash
    git clone https://github.com/your-username/programming-challenge-platform.git
 
 2. Set up MySQL and import tables from database.sql.
 
-
 3. Open the project in Eclipse or IntelliJ.
-
 
 4. Configure Tomcat server and run the project.
 
-
-5. Visit:
-
-http://localhost:8080/ProgrammingPlatform/
+5. Visit: http://localhost:8080/ProgrammingPlatform/
+```
+---
 
