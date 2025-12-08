@@ -1,148 +1,82 @@
-# Employee Management System (EMS)
+# 💻 Programming Challenge Platform
 
-A complete Employee Management System built with **Spring Boot 3**, **Spring Security 6**, **Thymeleaf**, and **MySQL**.  
-The system provides two dashboards — **Admin** and **Employee** — with rich features for real-world usage.
-
----
-
-## 🚀 Features
-
-### 👨‍💼 Admin Features
-- Manage Employees (Create, Update, Delete)
-- Company Information Management
-- Approve/Reject Leave Requests
-- Generate Payroll for Employees
-- View Payroll History
-- Attendance Reports
-- Secure Admin Dashboard
-
-### 👨‍🔧 Employee Features
-- View Profile
-- Mark Attendance
-- Apply for Leave
-- View Leave Status
-- View Payroll History
+This is a **Java-based Programming Challenge Platform** that allows users to participate in quizzes and coding challenges. The platform includes features for managing user progress, medals, and coding tasks. Users can choose languages (Python, C++, Java) to solve problems interactively.
 
 ---
 
-## 🏗️ Project Structure (Simple Overview)
+## 💡 Features
 
-```
-src/
- ├── main/
- │   ├── java/com/example/ems/
- │   │   ├── Controller/     → All controllers
- │   │   ├── Model/          → Entities (User, Employee, Payroll…)
- │   │   ├── Repository/     → Spring Data JPA Repos
- │   │   ├── Service/        → Business logic
- │   │   ├── Security/       → Spring Security config
- │   │   └── EmsApplication  → Main class
- │   └── resources/
- │       ├── templates/      → Thymeleaf HTML files
- │       ├── static/         → CSS, JS
- │       └── application.properties
-```
+### 👨‍💼 Admin Panel
+- Add, update, and delete coding challenges.
+- View users' quiz and challenge progress.
+- Manage medal counts.
 
----
+### 👥 User Panel
+- Sign up and log in securely.
+- Browse available quizzes and coding challenges.
+- Submit solutions in C, C++, Java, and Python.
+- View results and real-time feedback.
+- Track progress and medals earned.
 
-## 🛠️ Technologies Used
-
-- **Java 21**
-- **Spring Boot 3.2**
-- **Spring Security 6**
-- **Spring Data JPA**
-- **Thymeleaf**
-- **MySQL**
-- **Tailwind CSS**
+### ⭐ Special Features
+- **Randomized Quizzes** from uncompleted sets.
+- **Multilanguage Code Execution** with `ProcessBuilder`.
+- **Auto Code Validation** against test cases.
+- **Session Handling** and security features.
+- **Dynamic Difficulty** adjustment based on user progress.
 
 ---
 
-## ⚙️ Installation & Setup
+## 📁 File Structure
 
-### 1️⃣ Clone the Project
-```
-git clone https://github.com/your-repo/ems.git
-cd ems
-```
-
-### 2️⃣ Configure MySQL
-Create a database:
-```
-CREATE DATABASE ems;
-```
-
-### 3️⃣ Update `application.properties`
-```
-spring.datasource.url=jdbc:mysql://localhost:3306/ems
-spring.datasource.username=your_user
-spring.datasource.password=your_password
-
-spring.jpa.hibernate.ddl-auto=update
-```
-
-### 4️⃣ Run the Project
-```
-mvn spring-boot:run
-```
-
-Server starts at:
-```
-http://localhost:3030
-```
+- `ProgrammingChallengePlatform.java` – Main backend controller.
+- `User.java`, `SessionManager.java` – User login/session management.
+- `Challenge.java`, `Quiz.java` – Handles challenges and quizzes.
+- `testcases/` – Stores test cases for each coding challenge.
+- `quizdata/` – JSON or DB-backed quiz question storage.
 
 ---
 
-## 🔐 Default Login (Example)
-| Role | Username | Password |
-|------|----------|----------|
-| Admin | admin | admin123 |
+## 🔧 Technologies Used
+
+- **Language:** Java (Servlets, JDBC)
+- **Frontend:** HTML, CSS, JavaScript (minimal)
+- **Database:** MySQL
+- **Concepts:** OOP, File Handling, Code Execution, JSON
+- **Security:** Email, phone, and DOB validation
 
 ---
 
-## 📁 Important Modules
+## 📸 Sample Screens
 
-### 🔹 Authentication
-- Spring Security with Role-based access (ADMIN, EMPLOYEE)
-
-### 🔹 Employee Management
-- CRUD operations
-- Linked with User Login system
-
-### 🔹 Payroll Module
-- Generate monthly salary
-- View payroll history
-- Automatic net salary calculation
-
-### 🔹 Company Information
-Admin can update:
-- Company name  
-- Address  
-- Contact details  
-
-### 🔹 Leave Management
-- Employee applies leave
-- Admin approves/rejects
+> _Run on localhost using a Java-supported IDE or deploy to a servlet container like Apache Tomcat._
 
 ---
 
-## 🖼️ UI Overview (Simple)
-- TailwindCSS based modern clean UI
-- Separate dashboards
-- Responsive design
+## 🧠 Concepts Demonstrated
+
+- Classes and Objects
+- Inheritance and Polymorphism
+- File Handling & JSON Parsing
+- ProcessBuilder for code execution
+- Servlet session management
+- MySQL integration using JDBC
 
 ---
 
-## 📌 Future Enhancements
-- Add PDF salary slip download
-- Add email notifications
-- Add department-wise reports
+## 🚀 Getting Started
 
+```bash
+1. Clone this repository:
+   git clone https://github.com/your-username/programming-challenge-platform.git
+
+2. Set up MySQL and import tables from database.sql.
+
+3. Open the project in Eclipse or IntelliJ.
+
+4. Configure Tomcat server and run the project.
+
+5. Visit: http://localhost:8080/ProgrammingPlatform/
+```
 ---
 
-## 🤝 Contributing
-Feel free to fork and contribute!
-
----
-
-## 📜 License
-This project is free for educational and personal use.
